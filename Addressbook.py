@@ -29,8 +29,12 @@ def check_empty_ab(func):
 
 
 
+class ExecuteWay(ABC):
+    @abstractmethod
+    def upload(self):
+        pass
 
-class AddressBook(UserDict, ABC):
+class AddressBook(UserDict):
     def __init__(self):
         super().__init__()
 
@@ -41,10 +45,6 @@ class AddressBook(UserDict, ABC):
         else:
             print(f"Contact {record['Name']} is already exists")
 
-    @abstractmethod
-    @check_empty_ab
-    def upload(self):
-        pass
 
     @check_empty_ab
     def add_phone(self):
@@ -214,7 +214,7 @@ class AddressBook(UserDict, ABC):
             else:
                 print("Wrong filename format. Should be like 'example.extension'")
 
-class PrintedAddressbook(AddressBook):
+class PrintedAddressbook(AddressBook, ExecuteWay):
     def upload(self):
         [last_key] = deque(self.data, maxlen=1)
         print("------------------------------------")
@@ -228,7 +228,7 @@ class PrintedAddressbook(AddressBook):
                 print("************************************")
         print("------------------------------------")
 
-class SavedAddressbook(AddressBook):
+class SavedAddressbook(AddressBook, ExecuteWay):
     def upload(self):
         [last_key] = deque(self.data, maxlen=1)
         with open("Addressbook.txt","a",encoding="utf-8") as f:
@@ -244,11 +244,24 @@ class SavedAddressbook(AddressBook):
             f.writelines("------------------------------------\n")
         print("Data was successfully saved")
 
-class SpokedAddressbook(AddressBook):
+class SpokedAddressbook(AddressBook, ExecuteWay):
     def upload(self):
+        months = {1:"January",
+                 2: "February",
+                 3: "March",
+                 4: "April",
+                 5: "May",
+                 6: "June",
+                 7: "July",
+                 8: "August",
+                 9: "September",
+                 10: "October",
+                 11: "November",
+                 12: "December"
+                 }
         for key, el in self.data.items():
             engine = pyttsx3.init()
-            text_to_speak = f"It's {el['Name']}. He's live at {el['Address']}. You can call him by {el['Number']} or write on {el['Email']}. And, of course, don't forget to congratulate him at {el['Birthdate']}"
+            text_to_speak = f"It's {el['Name']}. He's live at {el['Address']}. You can call him by {el['Number']} or write on {el['Email']}. And, of course, don't forget to congratulate him at {el['Birthdate'].day} of {months.get(el['Birthdate'].month)}"
             engine.setProperty('rate', 130)
             engine.say(text_to_speak)
             engine.runAndWait()
